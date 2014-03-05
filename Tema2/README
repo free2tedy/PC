@@ -1,0 +1,22 @@
+Nume: Dimcica Tudor
+Grupa: 321CC
+
+
+Detalii despre implementarea procesarii si trimiterii mesajelor:
+
+	Pentru stocarea LSA-urilor actualizate am folosit un vector de msg de capacitate KIDS.
+	Pentru stocarea mesajelor in vederea prelucrarii lor la urmatorul pas de timp am folosit
+	doi vectori cu comportament de cozi (oldQueue si newQueue, cu (foQ, loQ), (fnQ, lnQ) pe
+	post de (first, last)). Mesajele 1 si 3 sunt puse in coada doar daca fie LSA-urile nu 
+	exista in LSADatabase, fie au seq_no mai mare decat cele existente si au fost create la
+	un timp mai mare sau egal decat ultimul LSA procesat si stocat. Pentru informatii legate
+	de vecini si pachete am ales sa imi creez o structura proprie, my_pkt care sa fie pusa in
+	payload-ul mesajului. Informatiile despre vecini sunt puse in vectorul vecini[10] ai
+	acestei structuri unde practic se copiaza linia din topologie al ruterului care creeaza
+	LSA-ul. Pentru fiecare tip de mesaj si eveniment am inserat comentarii in cod pentru 
+	clarificarea modului de procesare si implementare. Pentru calculul tabelei de rutare am
+	folosit algoritmul lui Dijkstra din cartea lui Andrew Tanenbaum insa putin modificat
+	pentru a salva corespunzator next_hop.
+	
+			
+
