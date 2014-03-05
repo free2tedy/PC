@@ -1,0 +1,76 @@
+Nume: Dimcica Tudor
+Grupa: 321CC
+
+
+* PC, Tema1 *
+
+Compilare: make
+Pornire + verificare transfer: ./run_experiment.sh
+
+Unităti de măsură pentru parametrii din script:
+	* SPEED: Mb/s
+	* DELAY: ms
+	* LOSS: procentaj cadre pierdute
+	* CORRUPT: procentaj cadre corupte
+
+Domeniu de valori:
+	* SPEED = 5 .. 20 Mb/s
+	* DELAY = 10 ... 1000 ms
+	* LOSS = 0 ... 10 %
+	* CORRUPT = 0 .. 10% / 100 %
+	* TASK_INDEX = 0, 1, 2, 3 și 4
+
+/* ---- Detalii de implementare ---- */
+
+Initial se trimite numele fisierului pana se primeste ACK. Se calculeaza si se 
+trimite dimensiunea ferestrei glisante pana se primeste ACK.
+
+/* ---- Task 0 ---- */
+
+Se trimite prima fereastra(se citeste din fisier si se trimite cadru cu cadru). 
+Senderul asteapta ACK de la cadrul care urmeaza in ordine. In receiver, se primesc 
+pachetele unul cate unul, se scriu in fisier, si se trimite ACK inapoi catre 
+sender. ACK-urile trimise sunt dummy deoarece nu exista loss si ordinea in care se 
+primesc cadrele in ambele sensuri nu se schimba. La fiecare ACK primit de sender, 
+acesta va trimite urmatorul pachet, astfel fereastra glisanta mutandu-se cu o 
+pozitie. Receiverul primeste mesaje de pe canalul de comunicatii pana a scris in
+fisier numarul de pachete trimis in al doilea pachet de la inceputul transmisiunii.
+
+/* ---- Task 1 ---- */
+
+Se trimite prima fereastra. Senderul asteapta pachet cu ACK de la receiver.
+Continutul acestuia este reprezentat de numarul ultimului pachet preluat de receiver.
+Senderul verifica ce pachet a primit receiverul. Daca pachetul nu s-a pierdut si este
+urmatorul in ordine dupa cel primit anterior, senderul trimite urmatorul pachet si
+muta fereastra glisanta cu o pozitie. Daca pachetul primit nu este cel corect,
+senderul nu va mai trimite urmatorul pachet(va astepta ca receiverul sa goleasca 
+canalul), va primii ACK-urile de la pachetele ramase pe canal si va trimite o noua
+fereastra glisanta de la primul pachet pierdut abia in momentul primirii ACK-ului de
+la ultimul pachet din canal sau la timeout, in cazul in care ultimul pachet din
+canal/fereastra este si el pierdut. Receiverul primeste mesaje de pe canal pana a
+scris in fisier numarul de pachete trimis in al doilea pachet de la inceputul
+transmisiunii.
+
+/* ---- Task 2 & 3 ---- */
+
+Se trimite prima fereastra. Senderul asteapta pachet cu ACK de la receiver. Senderul
+verifica daca receiverul a primit pachetul corect. Daca e cel corect, se trimite
+urmatorul pachet, fereastra glisanta se muta cu o pozitie. Daca nu e cel corect,
+senderul retine ce pachet s-a primit si nu va mai trimite nici un pachet pana la
+golirea canalului. Senderul va continua sa primeasca ACK-uri de la receiver si va
+memora ce pachete a primit. La primirea de catre receiver a ultimului pachet de pe
+canal sau la timeout, in cazul in care acesta se pierde, senderul va verifica ce 
+pachete s-au pierdut si le va trimite exclusiv pe acelea. Apoi transmisiunea isi va
+relua trimiterea pe baza protocolui ferestrei glisante pana la urmatorul pachet 
+pierdut. Receiverul verifica fiecare pachet primit, daca primeste pachetul care 
+trebuie, il scrie in fisier, daca nu il primeste pe cel corect, il salveaza intr-un
+vector si il va scrie abia dupa ce a scris toate pachetele dinaintea acestuia.
+Implementarea detectiei pachetelor corupte a fost inglobata in taskul 2. Pe 
+langa numarul secventei si payload, este trimisa si suma octetilor din payload modulo
+256. Receiverul va calcula aceiasi suma pe baza payload-ului primit si il va compara
+cu suma primita prin structura pachetului. Daca acestea sunt egale pachetul este
+corect si va trimite ACK catre sender, daca nu sunt egale inseamna ca pachetul este
+corupt si nu va trimite nici un ACK sender-ului pentru a forta retransmisia
+pachetului. Receiverul primeste mesaje de pe canal pana a scris in fisier numarul de
+pachete trimis in al doilea pachet de la inceputul transmisiunii.
+
