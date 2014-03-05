@@ -3,25 +3,25 @@ Grupa: 	321CC
 
 Descriere functii:
 
-	dns_to_host 	 -> Parseaza adresa din formatul DNS in formatul 
-							 de tip www.abc.xyz. Functia citeste caractere 
-							 pana intalneste octetii care fac saltul inapoi 
-							 in buffer catre locul unde exista deja scrisa 
-							 restul adresei in format DNS. Dupa ce a salvat
-							 intregul nume in format DNS, functia transforma
-							 numele in formatul specificat mai sus.
+	dns_to_host 	-> Parseaza adresa din formatul DNS in formatul 
+					de tip www.abc.xyz. Functia citeste caractere 
+					pana intalneste octetii care fac saltul inapoi 
+					in buffer catre locul unde exista deja scrisa 
+					restul adresei in format DNS. Dupa ce a salvat
+					intregul nume in format DNS, functia transforma
+					numele in formatul specificat mai sus.
 						
-	name_to_dns 	 -> Transforma adresa din formatul www.google.com
-							 in formatul 3www6google3com0.
+	name_to_dns 	-> Transforma adresa din formatul www.google.com
+					in formatul 3www6google3com0.
 	
 	class_to_string -> Transforma parametrul care specifica clasa
-							 din numar in string.
+					din numar in string.
 	
 	type_to_string  -> Transforma parametrul care specifica tipul
-							 interogarii din numar in string.
+					interogarii din numar in string.
 	
-	get_type 		 -> Transforma parametrul care specifica tipul
-							 interogarii din string in numar.
+	get_type 	-> Transforma parametrul care specifica tipul
+					interogarii din string in numar.
 	
 Detalii implementare:
 
