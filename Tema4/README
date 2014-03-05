@@ -1,0 +1,88 @@
+Nume: 	Dimcica Tudor
+Grupa: 	321CC
+
+Descriere functii:
+
+	dns_to_host 	 -> Parseaza adresa din formatul DNS in formatul 
+							 de tip www.abc.xyz. Functia citeste caractere 
+							 pana intalneste octetii care fac saltul inapoi 
+							 in buffer catre locul unde exista deja scrisa 
+							 restul adresei in format DNS. Dupa ce a salvat
+							 intregul nume in format DNS, functia transforma
+							 numele in formatul specificat mai sus.
+						
+	name_to_dns 	 -> Transforma adresa din formatul www.google.com
+							 in formatul 3www6google3com0.
+	
+	class_to_string -> Transforma parametrul care specifica clasa
+							 din numar in string.
+	
+	type_to_string  -> Transforma parametrul care specifica tipul
+							 interogarii din numar in string.
+	
+	get_type 		 -> Transforma parametrul care specifica tipul
+							 interogarii din string in numar.
+	
+Detalii implementare:
+
+		Ip-urile serverelor DNS sunt citite si salvate intr-un vector de
+	stringuri. Primul pas din rezolvare este conectarea la socket.
+	Conectarea la socket este facuta intr-o bucla while pana cand 
+	conectarea se face cu succes la socket. Apoi se formeaza structura
+	sockaddr_in. Pachetele trimise si primite sunt prelucrate intr-o
+	bucla while pentru a putea retrimite pachete in cazul in care unul
+	dintre serverele DNS nu raspund la interogare. Pentru creearea
+	pachetului de interogare am folosit un buffer in care am pus in ordine
+	un dns_header_t, numele domeniului in format DNS si un dns_question_t.
+	Am accesat octetii buferului prin intermediul pointerilor, prin care
+	initial am setat toti bitii pe 0, si mai apoi am modificat doar
+	campurile necesare, id, qdcount, rd, numele domenului, qclass si qtype.
+	Pentru trimiterea pachetului am folosit sendto. In caz de eroare, am
+	incrementat contorul ce indica indexul ip-ului folosit din vectorul de
+	adrese, si am dat continue pentru a trece direct la bucla urmatoare de
+	while si a incerca trimiterea pachetului la urmatorul server DNS.
+	Dupa trimiterea cu succes, ascult pe socket cu functia listen cu
+	un timeout setat la 3 secunde. In caz de eroare sau timeout pe select
+	cresc din nou contorul si trec la urmatoarea bucla pentru a incerca
+	trimiterea mesajului la urmatorul server DNS. Aceiasi pasi ii urmez
+	si daca intervine eroare la recvfrom. Dupa primirea cu succes a 
+	raspunsului de la server, urmeaza prelucrarea efectiva a acestuia.
+	Bufferul care va contine informatia primita va avea urmatoarea ordine a
+	structurilor: dns_header_t,name,dns_question_t,(qname, dns_rr_t, rdata),
+	ultimele 2 din paranteza repetandu-se de un numar de ori egal cu
+	(question->ancount + question->nscount + question->arcount). Incep prin
+	salvarea celor 3 valori din question si duc pointerul la adresa imediat
+	de dupa structura dns_question. Apoi intr-o bucla for, parsez numele cu
+	functia dns_to_host, aflu tipul si clasa raspunsului si identific cu un 
+	pointer structura dns_rr_t pentru a afla length-ul lui rdata. Apoi mut
+	pointerul cu sizeof(dns_rr_t) mai in fata pentru a accesa zona de memorie
+	in care se afla rdata, si apoi in functie de tipul interogarii extrag
+	informatia dorita. Pentru fiecare sectiune, Answer, Authority si
+	Additional, pachetele sunt prelucrate cu cate un for separat.
+	
+Observatii:
+
+		Am implementat toate tipurile de interogari si sper eu, n-am omis nici
+	un camp precizat in format-inregistrari. Tema in esenta este usoara, din
+	pacate problemele in rezolvarea ei apar foarte usor de la pointeri si
+	padding(!). Pentru anumite prelucrari am folosit o structura proprie in
+	care am pus un element de tip dns_rr_t si un char pointer in care am
+	copiat diferiti octeti din zona de memorie asociata campului fictiv rdata. 
+	 
+		In arhiva am inclus:
+			* my_dns_client.c
+			* dns_message.h
+			* dns_servers.conf (cu ultimul server decomentat)
+			* Makefile
+			* run.sh  (script-ul folosit de mine pentru rularea temei, face make 
+						  clean, make si ruleaza executabilul cu argumentele date 
+						  scriptului)
+			* logfile (obtinut prin interogarea server-ului DNS cu toate tipurile
+						  cerute, pentru domeniul google.com, scrierea in log se 
+						  face cu append) 
+			* README
+		
+	
+	
+	
+	
